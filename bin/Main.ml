@@ -1,3 +1,3 @@
 open Ast
 
-let () = print_endline "hi"
+let () = fib |> ts_func |> String.concat "\n" |> print_endline
