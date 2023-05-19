@@ -1,4 +1,7 @@
 (executable
  (public_name struct_edit)
  (name main)
+ (flags
+  (:standard -warn-error "-unused-value-declaration")
+  (:standard -warn-error "-unused-constructor"))
  (libraries struct_edit))
