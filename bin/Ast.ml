@@ -35,7 +35,7 @@ and expr =
       return_type : string;
       body : block;
     }
-  | Lambda of { arguments : argument list; return_type : string; body : block }
+  | Lambda of { arguments : argument list; body : block }
 
 and statement =
   | Expr of expr
@@ -105,8 +105,40 @@ and ts_expr = function
       |> String.concat ", "
       |> Printf.sprintf "%s(%s)" name
   | Object _ -> ""
-  | Function { arguments = _; return_type = _; body = _ } -> ""
-  | Lambda { arguments = _; return_type = _; body = _ } -> ""
+  | Function
+      { arguments; return_type; body = { block = body } } ->
+    let args_s =
+        arguments
+        |> List.map ts_argument
+        |> String.concat ", "
+      in
+      let body_s =
+        body
+        |> List.map ts_statement
+        |> List.flatten
+        |> List.map indent
+      in
+      let first =
+        Printf.sprintf "function (%s): %s {" args_s
+          return_type
+      in
+      String.concat ""
+        (List.append (first :: body_s) [ "}" ])
+  | Lambda { arguments; body = { block = body } } ->
+      let args_s =
+        arguments
+        |> List.map ts_argument
+        |> String.concat ", "
+      in
+      let body_s =
+        body
+        |> List.map ts_statement
+        |> List.flatten
+        |> List.map indent
+      in
+      let first = Printf.sprintf "(%s) => {" name args_s in
+      String.concat ""
+        (List.append (first :: body_s) [ "}" ])
 
 and ts_statement = function
   | Expr e -> [ Printf.sprintf "%s;" (ts_expr e) ]
