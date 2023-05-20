@@ -28,7 +28,7 @@ and expr =
   | Ident of string
   | Number of string
   | Bool of bool
-  | Call of { name : string; args : expr list }
+  | Call of { func : expr; args : expr list }
   | Object of (string * expr) list
 
 and statement =
@@ -89,7 +89,8 @@ and ts_expr = function
   | Number n -> n
   | Bool true -> "true"
   | Bool false -> "false"
-  | Call { name; args } ->
+  | Call { func; args } ->
+      let name = ts_expr func in
       args |> List.map ts_expr |> String.concat ", "
       |> Printf.sprintf "%s(%s)" name
   | Object _ -> ""
@@ -173,7 +174,7 @@ let fib : func =
                             None,
                             Call
                               {
-                                name = "fib";
+                                func = Ident "fib";
                                 args =
                                   [ BinOps (Ident "n", [ (Sub, Number "2") ]) ];
                               } );
@@ -182,7 +183,7 @@ let fib : func =
                             None,
                             Call
                               {
-                                name = "fib";
+                                func = Ident "fib";
                                 args =
                                   [ BinOps (Ident "n", [ (Sub, Number "1") ]) ];
                               } );
