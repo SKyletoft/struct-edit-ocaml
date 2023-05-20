@@ -30,6 +30,12 @@ and expr =
   | Bool of bool
   | Call of { func : expr; args : expr list }
   | Object of (string * expr) list
+  | Function of {
+      arguments : argument list;
+      return_type : string;
+      body : block;
+    }
+  | Lambda of { arguments : argument list; return_type : string; body : block }
 
 and statement =
   | Expr of expr
@@ -94,6 +100,8 @@ and ts_expr = function
       args |> List.map ts_expr |> String.concat ", "
       |> Printf.sprintf "%s(%s)" name
   | Object _ -> ""
+  | Function { arguments = _; return_type = _; body = _ } -> ""
+  | Lambda { arguments = _; return_type = _; body = _ } -> ""
 
 and ts_statement = function
   | Expr e -> [ Printf.sprintf "%s;" (ts_expr e) ]
