@@ -126,20 +126,14 @@ and ts_statement = function
       List.append (List.append first ("} else {" :: else_)) [ "}" ]
   | Let (name, ty, Some e) ->
       let e = ts_expr e in
-      let t =
-        match ty with Some t -> Printf.sprintf ": %s" t | None -> ""
-      in
+      let t = match ty with Some t -> Printf.sprintf ": %s" t | None -> "" in
       [ Printf.sprintf "let %s%s = %s;" name t e ]
   | Let (name, ty, None) ->
-      let t =
-        match ty with Some t -> Printf.sprintf ": %s" t | None -> ""
-      in
+      let t = match ty with Some t -> Printf.sprintf ": %s" t | None -> "" in
       [ Printf.sprintf "let %s%s;" name t ]
   | Const (name, ty, e) ->
       let e = ts_expr e in
-      let t =
-        match ty with Some t -> Printf.sprintf ": %s" t | None -> ""
-      in
+      let t = match ty with Some t -> Printf.sprintf ": %s" t | None -> "" in
       [ Printf.sprintf "let %s%s = %s;" name t e ]
 
 and ts_func { name; arguments; return_type; body = { block = body } } =
