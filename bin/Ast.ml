@@ -1,4 +1,14 @@
-type argument = { arg : string option; ty : string option }
+type decl =
+  | Let of string option * string option * expr option
+  | Const of string option * string option * expr option
+  | Func of {
+      name : string option;
+      arguments : argument option list;
+      return_type : string option;
+      body : block;
+    }
+
+and argument = { arg : string option; ty : string option }
 
 and bop =
   | LT
@@ -44,17 +54,9 @@ and statement =
   | Expr of expr option
   | Return of expr option
   | If of expr * block * block option
-  | Let of string option * string option * expr option
-  | Const of string option * string option * expr option
+  | Decl of decl
 
 and block = { block : statement list }
-
-and func = {
-  name : string option;
-  arguments : argument option list;
-  return_type : string option;
-  body : block;
-}
 
 let indent = Printf.sprintf "\t%s"
 let indent_ = List.map indent
@@ -213,6 +215,13 @@ and ts_statement = function
       List.append
         (List.append first ("} else {" :: else_))
         [ "}" ]
+  | Decl d -> ts_decl d
+
+and ts_decl_o = function
+  | Some x -> ts_decl x
+  | None -> [ "_" ]
+
+and ts_decl = function
   | Let (name, ty, Some e) ->
       let n = ts_string_o name in
       let e = ts_expr e in
@@ -227,36 +236,30 @@ and ts_statement = function
       let e = ts_expr_o e in
       let t = ts_string_o ty in
       [ Printf.sprintf "let %s: %s = %s;" n t e ]
-
-and ts_func_o x =
-  match x with
-  | Some x -> x
-  | None -> [ "_" ]
-
-and ts_func
-    {
-      name;
-      arguments;
-      return_type;
-      body = { block = body };
-    } =
-  let n = ts_string_o name in
-  let args_s =
-    arguments
-    |> List.map ts_argument_o
-    |> String.concat ", "
-  in
-  let r = ts_string_o return_type in
-  let body_s =
-    body
-    |> List.map ts_statement
-    |> List.flatten
-    |> List.map indent
-  in
-  let first =
-    Printf.sprintf "function %s(%s): %s {" n args_s r
-  in
-  List.append (first :: body_s) [ "}" ]
+  | Func
+      {
+        name;
+        arguments;
+        return_type;
+        body = { block = body };
+      } ->
+      let n = ts_string_o name in
+      let args_s =
+        arguments
+        |> List.map ts_argument_o
+        |> String.concat ", "
+      in
+      let r = ts_string_o return_type in
+      let body_s =
+        body
+        |> List.map ts_statement
+        |> List.flatten
+        |> List.map indent
+      in
+      let first =
+        Printf.sprintf "function %s(%s): %s {" n args_s r
+      in
+      List.append (first :: body_s) [ "}" ]
 
 (*
   function fib(n: number): number {
@@ -269,81 +272,91 @@ and ts_func
     }
   }
 *)
-let fib : func =
-  {
-    name = Some "fib";
-    arguments =
-      [ Some { arg = Some "n"; ty = Some "number" } ];
-    return_type = Some "number";
-    body =
-      {
-        block =
-          [
-            If
-              ( BinOps
-                  ( Some (Ident "n"),
-                    [ (Some LTE, Some (Number "1")) ] ),
-                { block = [ Return (Some (Number "1")) ] },
-                Some
-                  {
-                    block =
-                      [
-                        Const
-                          ( Some "prev",
-                            None,
-                            Some
-                              (Call
-                                 {
-                                   func = Some (Ident "fib");
-                                   args =
-                                     [
-                                       Some
-                                         (BinOps
-                                            ( Some
-                                                (Ident "n"),
-                                              [
-                                                ( Some Sub,
-                                                  Some
-                                                    (Number
-                                                       "2")
-                                                );
-                                              ] ));
-                                     ];
-                                 }) );
-                        Const
-                          ( Some "before_that",
-                            None,
-                            Some
-                              (Call
-                                 {
-                                   func = Some (Ident "fib");
-                                   args =
-                                     [
-                                       Some
-                                         (BinOps
-                                            ( Some
-                                                (Ident "n"),
-                                              [
-                                                ( Some Sub,
-                                                  Some
-                                                    (Number
-                                                       "1")
-                                                );
-                                              ] ));
-                                     ];
-                                 }) );
-                        Return
-                          (Some
-                             (BinOps
-                                ( Some (Ident "prev"),
-                                  [
-                                    ( Some Add,
-                                      Some
-                                        (Ident "before_that")
-                                    );
-                                  ] )));
-                      ];
-                  } );
-          ];
-      };
-  }
+let fib : decl =
+  Func
+    {
+      name = Some "fib";
+      arguments =
+        [ Some { arg = Some "n"; ty = Some "number" } ];
+      return_type = Some "number";
+      body =
+        {
+          block =
+            [
+              If
+                ( BinOps
+                    ( Some (Ident "n"),
+                      [ (Some LTE, Some (Number "1")) ] ),
+                  { block = [ Return (Some (Number "1")) ] },
+                  Some
+                    {
+                      block =
+                        [
+                          Decl
+                            (Const
+                               ( Some "prev",
+                                 None,
+                                 Some
+                                   (Call
+                                      {
+                                        func =
+                                          Some (Ident "fib");
+                                        args =
+                                          [
+                                            Some
+                                              (BinOps
+                                                 ( Some
+                                                     (Ident
+                                                        "n"),
+                                                   [
+                                                     ( Some
+                                                         Sub,
+                                                       Some
+                                                         (Number
+                                                            "2")
+                                                     );
+                                                   ] ));
+                                          ];
+                                      }) ));
+                          Decl
+                            (Const
+                               ( Some "before_that",
+                                 None,
+                                 Some
+                                   (Call
+                                      {
+                                        func =
+                                          Some (Ident "fib");
+                                        args =
+                                          [
+                                            Some
+                                              (BinOps
+                                                 ( Some
+                                                     (Ident
+                                                        "n"),
+                                                   [
+                                                     ( Some
+                                                         Sub,
+                                                       Some
+                                                         (Number
+                                                            "1")
+                                                     );
+                                                   ] ));
+                                          ];
+                                      }) ));
+                          Return
+                            (Some
+                               (BinOps
+                                  ( Some (Ident "prev"),
+                                    [
+                                      ( Some Add,
+                                        Some
+                                          (Ident
+                                             "before_that")
+                                      );
+                                    ] )));
+                        ];
+                    } );
+            ];
+        };
+    }
