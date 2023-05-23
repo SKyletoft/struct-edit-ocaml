@@ -25,8 +25,11 @@ fib =
         (Just
            [ SDecl (Const (Just "prev") Nothing Nothing)
            , SDecl (Const (Just "before_that") Nothing Nothing)
-           , Return . Just . BinOps (Just (Ident "prev")) $
-             [(Just Add, Just (Ident "before_that"))]
+           , Return
+               (Just
+                  (BinOps
+                     (Just (Ident "prev"))
+                     [(Just Add, Just (Ident "before_that"))]))
            ])
     ]
 
