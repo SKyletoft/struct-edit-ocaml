@@ -1,3 +1,7 @@
+module Main where
+
+import           Brick
+
 import           Ast
 import           Display
 import           Edit
@@ -33,4 +37,10 @@ fib =
            ])
     ]
 
-main = putStrLn . unlines . displays $ fib
+main :: IO ()
+main = do
+  let fib' :: String
+      fib' = unlines . displays $ fib
+      ui :: Widget ()
+      ui = str fib'
+  simpleMain ui

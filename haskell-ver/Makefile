@@ -1,7 +1,7 @@
 files := Main.hs Ast.hs Display.hs Edit.hs
 
 Main: $(files)
-	ghc Main.hs -O3
+	ghc Main.hs -O3 -threaded
 
 run: Main
 	./Main
