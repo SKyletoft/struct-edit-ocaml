@@ -5,7 +5,8 @@ data Decl
   | Const (Maybe String) (Maybe String) (Maybe Expr)
   | Func (Maybe String) [Maybe Argument] (Maybe String) [Statement]
 
-data Argument = Argument (Maybe String) (Maybe String)
+data Argument =
+  Argument (Maybe String) (Maybe String)
 
 data Bop
   = LT
@@ -27,7 +28,9 @@ data Bop
   | BOr
   | BAnd
 
-data Uop = Not | BNot
+data Uop
+  = Not
+  | BNot
 
 data Expr
   = BinOps (Maybe Expr) [(Maybe Bop, Maybe Expr)]
