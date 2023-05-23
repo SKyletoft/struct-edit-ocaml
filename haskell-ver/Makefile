@@ -1,4 +1,4 @@
-files := Main.hs Ast.hs Display.hs
+files := Main.hs Ast.hs Display.hs Edit.hs
 
 Main: $(files)
 	ghc Main.hs -O3
