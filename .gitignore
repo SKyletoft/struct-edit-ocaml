@@ -34,3 +34,6 @@ _opam/
 # Haskell
 *.hi
 Main
+
+# Nix
+result
