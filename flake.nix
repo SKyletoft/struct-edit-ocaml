@@ -18,6 +18,8 @@
 				};
 				custom-haskell = pkgs.ghc.withPackages(pkgs: with pkgs; [
 					split
+					brick
+
 					hindent
 					stylish-haskell
 					QuickCheck
