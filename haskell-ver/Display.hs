@@ -82,7 +82,7 @@ instance Display Expr where
         let l = orBlank h
             o = orBlank op
             r = display (BinOps e es)
-         in [l ++ o ++ r]
+         in [l ++ ' ' : o ++ ' ' : r]
       Unop o e -> [orBlank o ++ orBlank e]
       Ident s -> [s]
       Number n -> [n]
