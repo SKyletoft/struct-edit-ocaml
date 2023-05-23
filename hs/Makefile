@@ -1,4 +1,6 @@
-Main: Main.hs Ast.hs Display.hs
+files := Main.hs Ast.hs Display.hs
+
+Main: $(files)
 	ghc Main.hs -O3
 
 run: Main
@@ -7,5 +9,11 @@ run: Main
 run_:
 	runhaskell Main.hs
 
+format:
+	hindent $(files)
+	stylish-haskell -i $(files)
+
 clean:
 	-rm *.o *.hi Main
+
+.PHONY: format clean
