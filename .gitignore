@@ -30,3 +30,7 @@ _opam/
 
 # Direnv
 .envrc
+
+# Haskell
+*.hi
+Main

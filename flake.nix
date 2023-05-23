@@ -16,6 +16,13 @@
 					struct-edit = {};
 					default = packages.struct-edit;
 				};
+				custom-haskell = pkgs.ghc.withPackages(pkgs: with pkgs; [
+					split
+					hindent
+					stylish-haskell
+					QuickCheck
+					haskell-language-server
+				]);
 				devShells.default = pkgs.mkShell {
 					nativeBuildInputs = with pkgs; [
 						dune_3
@@ -25,6 +32,8 @@
 						ocamlPackages.odoc
 						ocamlPackages.utop
 						ocamlPackages.merlin
+						custom-haskell
+						gnumake
 					];
 					shellHook = ''
 						alias orun="dune build && dune exec ./bin/main.exe"
