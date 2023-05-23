@@ -13,7 +13,23 @@
 				lib = nixpkgs.lib;
 			in rec {
 				packages = {
-					struct-edit = {};
+					struct-edit = pkgs.stdenv.mkDerivation {
+						pname = "struct-edit";
+						version = "0.0.1";
+						src = ./haskell-ver;
+						nativeBuildInputs = [ custom-haskell ];
+						buildInputs = with pkgs; [
+							# Packages listed by ldd when built with nix build
+							ncurses
+							gmp
+							libffi
+							glibc
+						];
+						installPhase = ''
+							mkdir -p $out
+							cp Main $out/struct-edit
+						'';
+					};
 					default = packages.struct-edit;
 				};
 				custom-haskell = pkgs.ghc.withPackages(pkgs: with pkgs; [
