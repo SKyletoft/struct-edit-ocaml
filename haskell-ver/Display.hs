@@ -113,8 +113,15 @@ instance Display Statement where
           (x:xs) ->
             let (l:ls) = reverse xs
              in todo
-      If {} -> ["if ..."]
-      SDecl d -> displays d
+      If c t Nothing ->
+        let cond = orBlank c
+            then' = map (indent . concat . displays) t
+         in ("if (" ++ cond ++ ") {") : then' ++ ["}"]
+      If c t (Just e) ->
+        let cond = orBlank c
+            then' = map (indent . concat . displays) t
+            else' = map (indent . concat . displays) e
+         in ("if (" ++ cond ++ ") {") : then' ++ ["} else {"] ++ else' ++ ["}"]
 
 instance Display Decl where
   display = unwords . displays
