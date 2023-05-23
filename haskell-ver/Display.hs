@@ -122,6 +122,7 @@ instance Display Statement where
             then' = map (indent . concat . displays) t
             else' = map (indent . concat . displays) e
          in ("if (" ++ cond ++ ") {") : then' ++ ["} else {"] ++ else' ++ ["}"]
+      SDecl d -> map (++ ";") . displays $ d
 
 instance Display Decl where
   display = unwords . displays
