@@ -142,6 +142,6 @@ instance Display Decl where
         let name = unwrap n
             args = join ", " . map orBlank $ as
             ret = unwrap r
-            expr = map (indent . display) ss
+            expr = map indent . concatMap displays $ ss
          in ("function " ++ name ++ "(" ++ args ++ "): " ++ ret ++ " {") :
             expr ++ ["}"]
