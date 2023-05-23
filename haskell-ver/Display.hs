@@ -10,7 +10,12 @@ class Display a where
   display :: a -> String
 
 data DynDisplay =
-  forall a. Dis a
+  forall a. Display a =>
+            Dis a
+
+instance Display DynDisplay where
+  display (Dis x) = display x
+  displays (Dis x) = displays x
 
 data Layout =
   Layout
