@@ -23,18 +23,20 @@
 					QuickCheck
 					haskell-language-server
 				]);
+				custom-ocaml = with pkgs; [
+					dune_3
+					ocaml
+					ocamlformat
+					nodePackages.ocaml-language-server
+					ocamlPackages.odoc
+					ocamlPackages.utop
+					ocamlPackages.merlin
+				];
 				devShells.default = pkgs.mkShell {
-					nativeBuildInputs = with pkgs; [
-						dune_3
-						ocaml
-						ocamlformat
-						nodePackages.ocaml-language-server
-						ocamlPackages.odoc
-						ocamlPackages.utop
-						ocamlPackages.merlin
+					nativeBuildInputs = custom-ocaml ++ (with pkgs; [
 						custom-haskell
 						gnumake
-					];
+					]);
 					shellHook = ''
 						alias orun="dune build && dune exec ./bin/main.exe"
 					'';
