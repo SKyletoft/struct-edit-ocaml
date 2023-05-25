@@ -13,7 +13,9 @@ data Action
 class Navigate a where
   visit :: a -> Int -> Maybe DynNavigate
 
-class Navigate a => Edit a where
+class Navigate a =>
+      Edit a
+  where
   edit :: a -> Int -> Action -> DynNavigate
   editInner :: a -> [Int] -> Action -> DynNavigate
   actions :: a -> [Action]
