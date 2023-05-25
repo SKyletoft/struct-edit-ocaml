@@ -4,6 +4,12 @@ import           Ast
 
 todo = error "Not yet implemented"
 
+data Action
+  = EditText String
+  | InsertStatement
+  | AppendStatement
+  | InsertExpression
+
 class Navigate a where
   visit :: a -> Int -> Maybe DynNavigate
 
