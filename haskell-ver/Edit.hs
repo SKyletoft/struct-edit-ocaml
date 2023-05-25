@@ -1,6 +1,7 @@
 module Edit where
 
 import           Ast
+import           Display hiding (todo)
 
 todo = error "Not yet implemented"
 
@@ -10,7 +11,9 @@ data Action
   | AppendStatement
   | InsertExpression
 
-class Navigate a where
+class Display a =>
+      Navigate a
+  where
   visit :: a -> Int -> Maybe DynNavigate
 
 class Navigate a =>
@@ -21,8 +24,12 @@ class Navigate a =>
   actions :: a -> [Action]
 
 data DynNavigate =
-  forall a. Navigate a =>
+  forall a. (Display a, Navigate a) =>
             Nav a
+
+instance Display DynNavigate where
+  display (Nav x) = display x
+  displays (Nav x) = displays x
 
 instance Navigate DynNavigate where
   visit (Nav x) = visit x

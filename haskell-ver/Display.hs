@@ -17,6 +17,11 @@ instance Display DynDisplay where
   display (Dis x) = display x
   displays (Dis x) = displays x
 
+instance Display (Maybe String) where
+  display = unwrap
+  displays (Just x) = [x]
+  displays Nothing  = []
+
 data Layout =
   Layout
     { height  :: Int
