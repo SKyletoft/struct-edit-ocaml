@@ -1,12 +1,30 @@
 module Ast where
 
 data Decl
-  = Let (Maybe String) (Maybe String) (Maybe Expr)
-  | Const (Maybe String) (Maybe String) (Maybe Expr)
-  | Func (Maybe String) [Maybe Argument] (Maybe String) [Statement]
+  = Let
+      { dName :: Maybe String
+      , dType :: Maybe String
+      , dExpr :: Maybe Expr
+      }
+  | Const
+      { dName :: Maybe String
+      , dType :: Maybe String
+      , dExpr :: Maybe Expr
+      }
+  | Func
+      { dName :: Maybe String
+      , dArgs :: [Argument]
+      , dType :: Maybe String
+      , dBody :: [Statement]
+      }
+  deriving (Show)
 
 data Argument =
-  Argument (Maybe String) (Maybe String)
+  Argument
+    { aName :: Maybe String
+    , aExpr :: Maybe String
+    }
+  deriving (Show)
 
 data Bop
   = LT
@@ -27,24 +45,48 @@ data Bop
   | Xor
   | BOr
   | BAnd
+  deriving (Show)
 
 data Uop
   = Not
   | BNot
+  deriving (Show)
 
 data Expr
   = BinOps (Maybe Expr) [(Maybe Bop, Maybe Expr)]
   | Unop (Maybe Uop) (Maybe Expr)
-  | Ident String
-  | Number String
-  | Boolean Bool
-  | Call (Maybe Expr) [Maybe Expr]
+  | Ident
+      { cIdent :: String
+      }
+  | Number
+      { cNumber :: String
+      }
+  | Boolean
+      { cBool :: Bool
+      }
+  | Call
+      { cName   :: Maybe Expr
+      , cParams :: [Maybe Expr]
+      }
   | Object [(Maybe String, Maybe Expr)]
-  | Function [Maybe Argument] (Maybe String) [Statement]
-  | Lambda [Maybe Argument] [Statement]
+  | Function
+      { cArgs  :: [Argument]
+      , cRet   :: Maybe String
+      , cBlock :: [Statement]
+      }
+  | Lambda
+      { cArgs  :: [Argument]
+      , cBlock :: [Statement]
+      }
+  deriving (Show)
 
 data Statement
   = SExpr (Maybe Expr)
   | Return (Maybe Expr)
-  | If (Maybe Expr) [Statement] (Maybe [Statement])
+  | If
+      { iCond :: Maybe Expr
+      , iThen :: [Statement]
+      , iElse :: Maybe [Statement]
+      }
   | SDecl Decl
+  deriving (Show)

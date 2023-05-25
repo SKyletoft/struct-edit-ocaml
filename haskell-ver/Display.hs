@@ -17,10 +17,13 @@ instance Display DynDisplay where
   display (Dis x) = display x
   displays (Dis x) = displays x
 
-instance Display (Maybe String) where
-  display = unwrap
-  displays (Just x) = [x]
-  displays Nothing  = []
+instance Display String where
+  display = id
+  displays x = [x]
+
+instance Display a => Display (Maybe a) where
+  display = unwrap . fmap display
+  displays e = [display e]
 
 data Layout =
   Layout
@@ -41,7 +44,8 @@ join c [x]    = x
 join c (x:xs) = x ++ c ++ join c xs
 
 indent :: String -> String
-indent s = '\t' : s
+-- indent s = '\t' : s
+indent s = "  " ++ s
 
 indent' :: [String] -> [String]
 indent' = map indent
@@ -52,6 +56,16 @@ instance Display Argument where
         t = unwrap ty
      in n ++ ": " ++ t
   displays a = [display a]
+
+instance Display [Argument] where
+  display = unlines . displays
+  displays []       = []
+  displays [x]      = displays x
+  displays (x:y:xs) = (display x ++ ",") : displays (y : xs)
+
+instance Display [Statement] where
+  display = todo
+  displays = todo
 
 instance Display Bop where
   display b =
@@ -104,7 +118,7 @@ instance Display Expr where
          in [name ++ "(" ++ args ++ ")"]
       Object _ -> todo
       Function as r ss ->
-        let args = join ", " . map orBlank $ as
+        let args = join ", " . map display $ as
             body = map (indent . display) ss
             ret = unwrap r
             first = "function (" ++ args ++ "): " ++ ret ++ " {"
@@ -150,8 +164,8 @@ instance Display Decl where
          in ["const " ++ name ++ ": " ++ ty ++ " = " ++ expr]
       Func n as r ss ->
         let name = unwrap n
-            args = join ", " . map orBlank $ as
+            args = indent' . displays $ as
             ret = unwrap r
             expr = map indent . concatMap displays $ ss
-         in ("function " ++ name ++ "(" ++ args ++ "): " ++ ret ++ " {") :
-            expr ++ ["}"]
+         in ("function " ++ name ++ "(") :
+            args ++ ("): " ++ ret ++ " {") : expr ++ ["}"]
