@@ -13,6 +13,11 @@ data Action
 class Navigate a where
   visit :: a -> Int -> Maybe DynNavigate
 
+class Navigate a => Edit a where
+  edit :: a -> Int -> Action -> DynNavigate
+  editInner :: a -> [Int] -> Action -> DynNavigate
+  actions :: a -> [Action]
+
 data DynNavigate =
   forall a. Navigate a =>
             Nav a
@@ -34,3 +39,23 @@ instance Navigate Expr where
 
 instance Navigate Statement where
   visit _ _ = todo
+
+instance Edit Decl where
+  actions _ = todo
+  edit _ _ _ = error "Invalid action"
+  editInner _ _ _ = todo
+
+instance Edit Argument where
+  actions _ = todo
+  edit _ _ _ = error "Invalid action"
+  editInner _ _ _ = todo
+
+instance Edit Expr where
+  actions _ = todo
+  edit _ _ _ = error "Invalid action"
+  editInner _ _ _ = todo
+
+instance Edit Statement where
+  actions _ = todo
+  edit _ _ _ = error "Invalid action"
+  editInner _ _ _ = todo
