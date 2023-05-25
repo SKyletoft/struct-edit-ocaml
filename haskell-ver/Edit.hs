@@ -22,3 +22,15 @@ instance Navigate DynNavigate where
 
 instance Navigate (Maybe String) where
   visit _ _ = Nothing
+
+instance Navigate Decl where
+  visit _ _ = todo
+
+instance Navigate Argument where
+  visit _ _ = todo
+
+instance Navigate Expr where
+  visit _ _ = todo
+
+instance Navigate Statement where
+  visit _ _ = todo
