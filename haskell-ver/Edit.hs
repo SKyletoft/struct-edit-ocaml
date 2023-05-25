@@ -2,6 +2,8 @@ module Edit where
 
 import           Ast
 
+todo = error "Not yet implemented"
+
 class Navigate a where
   visit :: a -> Int -> Maybe DynNavigate
 
