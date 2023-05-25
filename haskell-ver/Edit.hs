@@ -1,12 +1,13 @@
 module Edit where
 
-import Ast
+import           Ast
 
 class Navigate a where
   visit :: a -> Int -> Maybe DynNavigate
 
 data DynNavigate =
-  forall a. Navigate a => Nav a
+  forall a. Navigate a =>
+            Nav a
 
 instance Navigate DynNavigate where
   visit (Nav x) = visit x
