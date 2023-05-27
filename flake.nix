@@ -32,7 +32,7 @@
 					};
 					default = packages.struct-edit;
 				};
-				custom-haskell = pkgs.ghc.withPackages(pkgs: with pkgs; [
+				custom-haskell = pkgs.haskell.packages.ghc92.ghc.withPackages(pkgs: with pkgs; [
 					split
 					brick
 
