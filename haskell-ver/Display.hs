@@ -64,8 +64,8 @@ instance Display [Argument] where
   displays (x:y:xs) = (display x ++ ",") : displays (y : xs)
 
 instance Display [Statement] where
-  display = todo
-  displays = todo
+  display = unlines . displays
+  displays = map display
 
 instance Display Bop where
   display b =
