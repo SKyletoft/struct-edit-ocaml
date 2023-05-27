@@ -135,6 +135,12 @@ instance Edit Argument where
      in as {aExpr = e'}
   editInner _ _ _ = todo
 
+instance Edit (Maybe Bop) where
+  actions _ = todo
+  edit _ 0 (InsertBinOp o) = Just o
+  edit o i a               = error $ show a ++ ", " ++ show i ++ ", " ++ show a
+  editInner _ _ _ = todo
+
 instance Edit (Maybe Expr) where
   actions _ = todo
   edit x 0 Get                   = x
