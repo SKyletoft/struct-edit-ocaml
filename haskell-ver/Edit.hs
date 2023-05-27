@@ -167,9 +167,19 @@ instance Edit Expr where
   editInner e@(BinOps l rs) (0:is) a =
     let l' = editInner' l is a
      in BinOps l' rs
-  editInner e@(BinOps l rs) (i:is) a
-    | odd i = todo
-    | even i = todo
+  editInner e@(BinOps l rs) (i:is) a =
+    let i' = (i - 1) `div` 2
+        preRs = take i' rs
+        postRs = drop (i' + 1) rs
+        (o, r) = rs !! i'
+        (o', r')
+          | odd i =
+            let o' = editInner' o is a
+             in (o', r)
+          | even i =
+            let r' = editInner' r is a
+             in (o, r')
+     in BinOps l (preRs ++ [(o', r')] ++ postRs)
   editInner e is a = error $ show e ++ ",\n" ++ show is ++ ",\n" ++ show a
 
 instance Edit Statement where
