@@ -1,7 +1,7 @@
 module Display where
 
 import           Ast
-import           Prelude   hiding (GT, LT)
+import           Prelude hiding (GT, LT)
 
 todo = error "todo"
 
