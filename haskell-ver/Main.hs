@@ -49,7 +49,7 @@ main = do
       f7 = editInner' f6 [3, 0, 0, 0] InsertTrue
       f8 = editInner' f6 [3, 0, 0, 0] (InsertIdent "n")
       f9 = editInner' f8 [3, 0, 0, 0, 0] MakeBinOp
-      f10 = editInner' f6 [3, 0, 0, 0, 0, 1] (InsertBinOp LTE)
-      f11 = editInner' f6 [3, 0, 0, 0, 0, 2] (InsertNumber "2")
+      f10 = editInner' f9 [3, 0, 0, 0, 1, 0] (InsertBinOp LTE)
+      f11 = editInner' f10 [3, 0, 0, 0, 2, 0] (InsertNumber "2")
    in putStrLn . unlines . concatMap ((++ [""]) . displays) $
       [fib, f0, f1, f2, f3, f4, f5, f6, f7, f8, f9, f10, f11]
