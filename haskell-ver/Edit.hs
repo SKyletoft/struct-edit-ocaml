@@ -143,11 +143,12 @@ instance Edit (Maybe Bop) where
 
 instance Edit (Maybe Expr) where
   actions _ = todo
-  edit x 0 Get                   = x
-  edit Nothing 0 InsertTrue      = Just (Boolean True)
-  edit Nothing 0 InsertFalse     = Just (Boolean False)
-  edit Nothing 0 (InsertIdent i) = Just (Ident i)
-  edit _ _ a                     = error $ "Invalid action " ++ show a
+  edit x 0 Get              = x
+  edit _ 0 InsertTrue       = Just (Boolean True)
+  edit _ 0 InsertFalse      = Just (Boolean False)
+  edit _ 0 (InsertIdent i)  = Just (Ident i)
+  edit _ 0 (InsertNumber n) = Just (Number n)
+  edit _ _ a                = error $ "Invalid action " ++ show a
   editInner (Just e) (0:is) a = Just $ editInner' e is a
   editInner Nothing (0:is) a  = error "Entering nothing"
 
