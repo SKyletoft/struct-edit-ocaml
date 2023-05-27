@@ -159,7 +159,13 @@ instance Edit Expr where
   edit x 0 Get       = x
   edit x 0 MakeBinOp = BinOps (Just x) [(Nothing, Nothing)]
   edit _ _ a         = error $ "Invalid action " ++ show a
-  editInner _ _ _ = error "hi"
+  editInner e@(BinOps l rs) (0:is) a =
+    let l' = editInner' l is a
+     in BinOps l' rs
+  editInner e@(BinOps l rs) (i:is) a
+    | odd i = todo
+    | even i = todo
+  editInner e is a = error $ show e ++ ",\n" ++ show is ++ ",\n" ++ show a
 
 instance Edit Statement where
   actions _ = todo
