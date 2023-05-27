@@ -76,7 +76,6 @@ instance Edit (Maybe String) where
 
 instance Edit [Argument] where
   actions _ = todo
-  edit :: [Argument] -> Int -> Action -> [Argument]
   edit x 0 Get             = x
   edit as i InsertArgument = as ++ [Argument Nothing Nothing]
   edit _ _ a               = error $ "Invalid action " ++ show a
