@@ -90,3 +90,11 @@ data Statement
       }
   | SDecl Decl
   deriving (Show)
+
+data Any
+  = AnyS Statement
+  | AnyE Expr
+  | AnyU Uop
+  | AnyB Bop
+  | AnyA Argument
+  | AnyD Decl

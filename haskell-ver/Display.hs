@@ -45,7 +45,8 @@ join c (x:xs) = x ++ c ++ join c xs
 
 indent :: String -> String
 -- indent s = '\t' : s
-indent s = "  " ++ s
+-- indent s = "  " ++ s
+indent s = "    " ++ s
 
 indent' :: [String] -> [String]
 indent' = map indent
@@ -62,6 +63,10 @@ instance Display [Argument] where
   displays []       = []
   displays [x]      = displays x
   displays (x:y:xs) = (display x ++ ",") : displays (y : xs)
+
+instance Display [Decl] where
+  display = unlines . displays
+  displays = concatMap displays
 
 instance Display [Statement] where
   display = unlines . displays

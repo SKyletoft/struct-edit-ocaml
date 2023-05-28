@@ -1,6 +1,7 @@
 module Edit where
 
 import           Debug.Trace
+import           GHC.Stack
 
 import           Ast
 import           Display     hiding (todo)
@@ -24,11 +25,13 @@ data Action
   | InsertFalse
   | InsertElse
   | InsertIdent String
+  | InsertParameter
   | InsertBinOp Bop
   | InsertUnOp Uop
   | MakeCall
   | MakeBinOp
   | Get
+  | Remove
   deriving (Show)
 
 class Display a =>
@@ -51,7 +54,10 @@ instance Edit DynEdit where
   editInner (Ed e) i a = Ed (editInner e i a)
   actions (Ed e) = actions e
 
-editInner' :: Edit a => a -> [Int] -> Action -> a
+editInner' ::
+     HasCallStack
+  => Edit a =>
+       a -> [Int] -> Action -> a
 editInner' _ [] _ = error "No more indicies"
 editInner' x [i] a =
   id
@@ -71,6 +77,7 @@ instance Edit (Maybe String) where
   actions _ = todo
   edit x 0 Get                = x
   edit _ 0 (EditText newName) = Just newName
+  edit _ 0 Remove = Nothing
   edit _ _ a                  = error $ "Invalid action " ++ show a
   editInner _ _ _ = error "Invalid action"
 
@@ -80,8 +87,9 @@ instance Edit [Argument] where
   edit as i InsertArgument = as ++ [Argument Nothing Nothing]
   edit _ _ a               = error $ "Invalid action " ++ show a
   editInner as (i:is) a =
-    let a' | length is == 1 = Argument Nothing Nothing
-           | otherwise      = editInner' (as !! i) is a
+    let a'
+          | length is == 1 = Argument Nothing Nothing
+          | otherwise = editInner' (as !! i) is a
         aPre = take i as
         aPost = drop (i + 1) as
      in aPre ++ [a'] ++ aPost
@@ -89,17 +97,31 @@ instance Edit [Argument] where
 instance Edit [Statement] where
   actions _ = todo
   edit s 0 Get = s
-  edit ss i InsertIf =
-    let s' = If Nothing [] Nothing
-        aPre = take i ss
+  edit ss i a =
+    let aPre = take i ss
         aPost = drop (i + 1) ss
+        s' =
+          case a of
+            InsertIf -> If Nothing [] Nothing
+            InsertReturn -> Return Nothing
+            InsertConst -> SDecl (Const Nothing Nothing Nothing)
+            InsertLet -> SDecl (Let Nothing Nothing Nothing)
+            _ -> error $ "Invalid action " ++ show a ++ ", " ++ show ss
      in aPre ++ [s'] ++ aPost
-  edit _ _ a = error $ "Invalid action " ++ show a
   editInner as (i:is) a =
     let a' = editInner' (as !! i) is a
         aPre = take i as
         aPost = drop (i + 1) as
      in aPre ++ [a'] ++ aPost
+
+instance Edit [Decl] where
+  actions _ = todo
+  edit _ _ _ = todo
+  editInner ds (i:is) a =
+    let d' = editInner' (ds !! i) is a
+        dPre = take i ds
+        dPost = drop (i + 1) ds
+     in dPre ++ [d'] ++ dPost
 
 instance Edit Decl where
   actions _ = todo
@@ -128,17 +150,27 @@ instance Edit Argument where
 instance Edit (Maybe Bop) where
   actions _ = todo
   edit _ 0 (InsertBinOp o) = Just o
+  edit _ 0 Remove = Nothing
   edit o i a               = error $ show a ++ ", " ++ show i ++ ", " ++ show a
   editInner _ _ _ = todo
 
 instance Edit (Maybe Expr) where
   actions _ = todo
-  edit x 0 Get              = x
-  edit _ 0 InsertTrue       = Just (Boolean True)
-  edit _ 0 InsertFalse      = Just (Boolean False)
-  edit _ 0 (InsertIdent i)  = Just (Ident i)
+  edit x 0 Get = x
+  edit _ 0 InsertTrue = Just (Boolean True)
+  edit _ 0 InsertFalse = Just (Boolean False)
+  edit _ 0 (InsertIdent i) = Just (Ident i)
   edit _ 0 (InsertNumber n) = Just (Number n)
-  edit _ _ a                = error $ "Invalid action " ++ show a
+  edit _ 0 Remove = Nothing
+  edit e _ a = error $ "Invalid action " ++ show a ++ ", " ++ show e
+  editInner (Just e) (0:is) a = Just $ editInner' e is a
+  editInner Nothing (0:is) a  = error "Entering nothing"
+
+instance Edit (Maybe [Expr]) where
+  actions _ = todo
+  edit x 0 Get = x
+  edit _ 0 Remove = Nothing
+  edit _ _ a   = error $ "Invalid action " ++ show a
   editInner (Just e) (0:is) a = Just $ editInner' e is a
   editInner Nothing (0:is) a  = error "Entering nothing"
 
@@ -146,18 +178,36 @@ instance Edit (Maybe [Statement]) where
   actions _ = todo
   edit x 0 Get              = x
   edit Nothing 0 InsertElse = Just []
+  edit _ 0 Remove = Nothing
   edit _ _ a                = error $ "Invalid action " ++ show a
   editInner (Just e) (0:is) a = Just $ editInner' e is a
   editInner Nothing (0:is) a  = error "Entering nothing"
+
+instance Edit [Expr] where
+  actions _ = todo
+  edit x i a = error $ show x ++ ", " ++ show i ++ ", " ++ show a
+  editInner es (i:is) a =
+    let e' = editInner' (es !! i) is a
+        preEs = take i es
+        postEs = drop (i + 1) es
+     in preEs ++ [e'] ++ postEs
+
+instance Edit [Maybe Expr] where
+  actions _ = todo
+  edit x i a = error $ show x ++ ", " ++ show i ++ ", " ++ show a
+  editInner es (i:is) a =
+    let e' = editInner' (es !! i) is a
+        preEs = take i es
+        postEs = drop (i + 1) es
+     in preEs ++ [e'] ++ postEs
 
 instance Edit Expr where
   actions _ = todo
   edit x 0 Get       = x
   edit x 0 MakeBinOp = BinOps (Just x) [(Nothing, Nothing)]
-  edit _ _ a         = error $ "Invalid action " ++ show a
-  editInner e@(BinOps l rs) (0:is) a =
-    let l' = editInner' l is a
-     in BinOps l' rs
+  edit x 0 MakeCall  = Call (Just x) []
+  edit e i a         = error $ show (e, i, a)
+  editInner e@(BinOps l rs) (0:is) a = BinOps (editInner' l is a) rs
   editInner e@(BinOps l rs) (i:is) a =
     let i' = (i - 1) `div` 2
         preRs = take i' rs
@@ -171,6 +221,8 @@ instance Edit Expr where
             let r' = editInner' r is a
              in (o, r')
      in BinOps l (preRs ++ [(o', r')] ++ postRs)
+  editInner e@(Call n _) (0:is) a = e {cName = editInner' n is a}
+  editInner e@(Call _ as) (1:is) a = e {cParams = editInner' as is a}
   editInner e is a = error $ show e ++ ",\n" ++ show is ++ ",\n" ++ show a
 
 instance Edit Statement where
@@ -184,3 +236,4 @@ instance Edit Statement where
   editInner i@(If _ t _) (1:is) a = i {iThen = editInner' t is a}
   editInner i@(If _ _ e) (2:is) a = i {iElse = editInner' e is a}
   editInner (SDecl d) (0:is) a    = SDecl $ editInner' d is a
+  editInner s i a = error $ show (s, i, a)
