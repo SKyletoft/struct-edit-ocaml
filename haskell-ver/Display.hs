@@ -97,6 +97,18 @@ instance Display Uop where
       BNot -> "~"
   displays u = [display u]
 
+instance Display [Maybe Expr] where
+  display = unlines . displays
+  displays []       = []
+  displays [x]      = displays x
+  displays (x:y:xs) = (display x ++ ",") : displays (y : xs)
+
+instance Display [Expr] where
+  display = unlines . displays
+  displays []       = []
+  displays [x]      = displays x
+  displays (x:y:xs) = (display x ++ ",") : displays (y : xs)
+
 instance Display Expr where
   display = unwords . displays
   displays e =
