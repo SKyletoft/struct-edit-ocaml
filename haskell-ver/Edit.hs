@@ -79,13 +79,9 @@ instance Edit [Argument] where
   edit x 0 Get             = x
   edit as i InsertArgument = as ++ [Argument Nothing Nothing]
   edit _ _ a               = error $ "Invalid action " ++ show a
-  editInner as [i, y] a =
-    let a' = Argument Nothing Nothing
-        aPre = take i as
-        aPost = drop (i + 1) as
-     in aPre ++ [a'] ++ aPost
   editInner as (i:is) a =
-    let a' = editInner' (as !! i) is a
+    let a' | length is == 1 = Argument Nothing Nothing
+           | otherwise      = editInner' (as !! i) is a
         aPre = take i as
         aPost = drop (i + 1) as
      in aPre ++ [a'] ++ aPost
@@ -109,31 +105,25 @@ instance Edit Decl where
   actions _ = todo
   edit x 0 Get = x
   edit _ _ a   = error $ "Invalid action " ++ show a
-  editInner f@(Func n _ _ _) (0:is) a =
-    let n' = editInner' n is a
-     in f {dName = n'}
-  editInner f@(Func _ as _ _) (1:is) a =
-    let as' = editInner' as is a
-     in f {dArgs = as'}
-  editInner f@(Func _ _ r _) (2:is) a =
-    let r' = editInner' r is a
-     in f {dType = r'}
-  editInner f@(Func _ _ _ b) (3:is) a =
-    let b' = editInner' b is a
-     in f {dBody = b'}
+  editInner c@(Const n _ _) (0:is) a = c {dName = editInner' n is a}
+  editInner c@(Const _ t _) (1:is) a = c {dType = editInner' t is a}
+  editInner c@(Const _ _ e) (2:is) a = c {dExpr = editInner' e is a}
+  editInner l@(Let n _ _) (0:is) a = l {dName = editInner' n is a}
+  editInner l@(Let _ t _) (1:is) a = l {dType = editInner' t is a}
+  editInner l@(Let _ _ e) (2:is) a = l {dExpr = editInner' e is a}
+  editInner f@(Func n _ _ _) (0:is) a = f {dName = editInner' n is a}
+  editInner f@(Func _ as _ _) (1:is) a = f {dArgs = editInner' as is a}
+  editInner f@(Func _ _ r _) (2:is) a = f {dType = editInner' r is a}
+  editInner f@(Func _ _ _ b) (3:is) a = f {dBody = editInner' b is a}
   editInner f is a = error $ display f ++ ", " ++ show is ++ ", " ++ show a
 
 instance Edit Argument where
   actions _ = todo
   edit x 0 Get = x
   edit _ _ a   = error $ "Invalid action " ++ show a
-  editInner as@(Argument n _) (0:is) a =
-    let n' = editInner' n is a
-     in as {aName = n'}
-  editInner as@(Argument _ e) (1:is) a =
-    let e' = editInner' e is a
-     in as {aExpr = e'}
-  editInner _ _ _ = todo
+  editInner as@(Argument n _) (0:is) a = as {aName = editInner' n is a}
+  editInner as@(Argument _ e) (1:is) a = as {aExpr = editInner' e is a}
+  editInner _ _ _                      = todo
 
 instance Edit (Maybe Bop) where
   actions _ = todo
@@ -186,16 +176,11 @@ instance Edit Expr where
 instance Edit Statement where
   actions _ = todo
   edit x 0 Get = x
-  edit _ _ a   = error $ "Invalid action " ++ show a
-  editInner (SExpr e) (0:is) a = SExpr $ editInner' e is a
-  editInner (Return e) (0:is) a = Return $ editInner' e is a
-  editInner i@(If c _ _) (0:is) a =
-    let c' = editInner' c is a
-     in i {iCond = c'}
-  editInner i@(If _ t _) (1:is) a =
-    let t' = editInner' t is a
-     in i {iThen = t'}
-  editInner i@(If _ _ e) (2:is) a =
-    let e' = editInner' e is a
-     in i {iElse = e'}
-  editInner (SDecl d) (0:is) a = SDecl $ editInner' d is a
+  edit i@(If _ _ Nothing) 0 InsertElse = i {iElse = Just []}
+  edit s _ a = error $ "Invalid action " ++ show a ++ ", " ++ show s
+  editInner (SExpr e) (0:is) a    = SExpr $ editInner' e is a
+  editInner (Return e) (0:is) a   = Return $ editInner' e is a
+  editInner i@(If c _ _) (0:is) a = i {iCond = editInner' c is a}
+  editInner i@(If _ t _) (1:is) a = i {iThen = editInner' t is a}
+  editInner i@(If _ _ e) (2:is) a = i {iElse = editInner' e is a}
+  editInner (SDecl d) (0:is) a    = SDecl $ editInner' d is a
