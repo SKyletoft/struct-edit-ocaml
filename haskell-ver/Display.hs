@@ -25,13 +25,6 @@ instance Display a => Display (Maybe a) where
   display = unwrap . fmap display
   displays e = [display e]
 
-data Layout =
-  Layout
-    { height  :: Int
-    , width   :: Int
-    , content :: [String]
-    }
-
 unwrap (Just x) = x
 unwrap Nothing  = "_"
 
