@@ -2,9 +2,17 @@ module Edit where
 
 import           Debug.Trace
 import           GHC.Stack
+import           Prelude     hiding ((!!))
 
 import           Ast
 import           Display     hiding (todo)
+
+infixl 9 !!
+
+(!!) :: HasCallStack => [a] -> Int -> a
+[] !! _     = error "(!!): index out of scope!"
+(x:_) !! 0  = x
+(_:xs) !! n = xs !! (n - 1)
 
 todo = error "Not yet implemented"
 
@@ -37,9 +45,9 @@ data Action
 class Display a =>
       Edit a
   where
-  edit :: a -> Int -> Action -> a
-  editInner :: a -> [Int] -> Action -> a
-  actions :: a -> [Action]
+  edit :: HasCallStack => a -> Int -> Action -> a
+  editInner :: HasCallStack => a -> [Int] -> Action -> a
+  actions :: HasCallStack => a -> [Action]
 
 data DynEdit =
   forall a. (Edit a, Display a) =>
@@ -56,17 +64,18 @@ instance Edit DynEdit where
 
 editInner' ::
      HasCallStack
-  => Edit a =>
-       a -> [Int] -> Action -> a
+  => Show a =>
+       Edit a =>
+         a -> [Int] -> Action -> a
 editInner' _ [] _ = error "No more indicies"
 editInner' x [i] a =
   id
-  -- . trace ("\nEditing actual: " ++ display x ++ "(" ++ show i ++ "), " ++ show a ++ "\n")
+  -- . trace ("\nEditing actual: " ++ show x ++ "(" ++ show i ++ "), " ++ show a ++ "")
    $
   edit x i a
 editInner' x is@(i:_) a =
   id
-  -- . trace ("\nEditing inner:  " ++ display x ++ "(" ++ show i ++ "), " ++ show a ++ "\n")
+  -- . trace ("\nEditing inner:  " ++ show x ++ "(" ++ show i ++ "), " ++ show a ++ "")
    $
   editInner x is a
 
@@ -77,7 +86,7 @@ instance Edit (Maybe String) where
   actions _ = todo
   edit x 0 Get                = x
   edit _ 0 (EditText newName) = Just newName
-  edit _ 0 Remove = Nothing
+  edit _ 0 Remove             = Nothing
   edit _ _ a                  = error $ "Invalid action " ++ show a
   editInner _ _ _ = error "Invalid action"
 
@@ -150,7 +159,7 @@ instance Edit Argument where
 instance Edit (Maybe Bop) where
   actions _ = todo
   edit _ 0 (InsertBinOp o) = Just o
-  edit _ 0 Remove = Nothing
+  edit _ 0 Remove          = Nothing
   edit o i a               = error $ show a ++ ", " ++ show i ++ ", " ++ show a
   editInner _ _ _ = todo
 
@@ -168,9 +177,9 @@ instance Edit (Maybe Expr) where
 
 instance Edit (Maybe [Expr]) where
   actions _ = todo
-  edit x 0 Get = x
+  edit x 0 Get    = x
   edit _ 0 Remove = Nothing
-  edit _ _ a   = error $ "Invalid action " ++ show a
+  edit _ _ a      = error $ "Invalid action " ++ show a
   editInner (Just e) (0:is) a = Just $ editInner' e is a
   editInner Nothing (0:is) a  = error "Entering nothing"
 
@@ -178,7 +187,7 @@ instance Edit (Maybe [Statement]) where
   actions _ = todo
   edit x 0 Get              = x
   edit Nothing 0 InsertElse = Just []
-  edit _ 0 Remove = Nothing
+  edit _ 0 Remove           = Nothing
   edit _ _ a                = error $ "Invalid action " ++ show a
   editInner (Just e) (0:is) a = Just $ editInner' e is a
   editInner Nothing (0:is) a  = error "Entering nothing"
@@ -236,4 +245,4 @@ instance Edit Statement where
   editInner i@(If _ t _) (1:is) a = i {iThen = editInner' t is a}
   editInner i@(If _ _ e) (2:is) a = i {iElse = editInner' e is a}
   editInner (SDecl d) (0:is) a    = SDecl $ editInner' d is a
-  editInner s i a = error $ show (s, i, a)
+  editInner s i a                 = error $ show (s, i, a)

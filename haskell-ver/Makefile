@@ -6,7 +6,7 @@ HS_FLAGS := \
 	-XLambdaCase
 
 Main: $(files)
-	ghc Main.hs $(HS_FLAGS) -O0 -threaded
+	ghc Main.hs $(HS_FLAGS) -O0 -threaded -g
 
 run: Main
 	./Main
@@ -15,8 +15,8 @@ run_:
 	runhaskell Main.hs $(HS_FLAGS)
 
 format:
-	hindent $(files)
-	stylish-haskell -i $(files)
+	hindent Ast.hs Display.hs Edit.hs
+	stylish-haskell -i Ast.hs Display.hs Edit.hs
 
 clean:
 	-rm *.o *.hi Main
