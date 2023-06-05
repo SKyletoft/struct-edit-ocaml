@@ -117,7 +117,7 @@ instance Display Expr where
             o = orBlank op
             r = display (BinOps e es)
          in [l ++ ' ' : o ++ ' ' : r]
-      Unop o e -> [orBlank o ++ orBlank e]
+      UnOp o e -> [orBlank o ++ orBlank e]
       Ident s -> [s]
       Number n -> [n]
       Boolean True -> ["true"]

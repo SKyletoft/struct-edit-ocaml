@@ -48,13 +48,14 @@ data Bop
   deriving (Show)
 
 data Uop
-  = Not
+  = Neg
+  | Not
   | BNot
   deriving (Show)
 
 data Expr
   = BinOps (Maybe Expr) [(Maybe Bop, Maybe Expr)]
-  | Unop (Maybe Uop) (Maybe Expr)
+  | UnOp (Maybe Uop) (Maybe Expr)
   | Ident
       { cIdent :: String
       }
