@@ -1,4 +1,4 @@
-files := Main.hs Ast.hs Display.hs DisplayWithHighlight Edit.hs
+files := Main.hs Ast.hs Display.hs Highlight.hs Edit.hs
 HS_FLAGS := \
 	-XGHC2021 \
 	-XOverloadedStrings \
@@ -15,8 +15,8 @@ run_:
 	runhaskell Main.hs $(HS_FLAGS)
 
 format:
-	hindent Ast.hs Display.hs Edit.hs
-	stylish-haskell -i Ast.hs Display.hs Edit.hs
+	hindent $(files)
+	stylish-haskell -i $(files)
 
 clean:
 	-rm *.o *.hi Main

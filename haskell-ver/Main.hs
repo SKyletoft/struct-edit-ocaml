@@ -5,8 +5,8 @@ import           Debug.Trace
 import           Brick
 
 import           Ast
-import           qualified Display
-import           qualified DisplayWithHighlight
+import           Display
+import           Highlight
 import           Edit
 
 {-
