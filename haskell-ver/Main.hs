@@ -20,99 +20,7 @@ import           Edit
     }
   }
 -}
-fib :: Decl
 fib =
-  Func
-    (Just "fib")
-    [Argument (Just "n") (Just "number")]
-    (Just "number")
-    [ If
-        (Just (BinOps (Just (Ident "n")) [(Just LTE, Just (Number "1"))]))
-        [Return (Just (Number "1"))]
-        (Just
-           [ SDecl (Const (Just "prev") Nothing Nothing)
-          , SDecl (Const (Just "before_that") Nothing Nothing)
-          , Return
-               (Just
-                  (BinOps
-                     (Just (Ident "prev"))
-                     [(Just Add, Just (Ident "before_that"))]))
-           ])
-    ]
-
-f36' =
-  [ Func
-     { dName = Just "fib"
-     , dArgs = [Argument {aName = Just "n", aExpr = Just "number"}]
-     , dType = Just "number"
-     , dBody =
-          [ If
-              { iCond =
-                  Just
-                    (BinOps
-                       (Just (Ident {cIdent = "n"}))
-                       [(Just LTE, Just (Number {cNumber = "1"}))])
-             , iThen =
-                  [ Return
-                      (Just
-                         (Call
-                            { cName = Just (Ident {cIdent = "fib"})
-                           , cParams =
-                                [ Just
-                                    (BinOps
-                                       (Just (Ident {cIdent = "n"}))
-                                       [ ( Just Sub
-                                        , Just (Number {cNumber = "1"}))
-                                       ])
-                                ]
-                            }))
-                  ]
-             , iElse =
-                  Just
-                    [ SDecl
-                        (Const
-                           { dName = Just "prev"
-                          , dType = Nothing
-                          , dExpr =
-                               Just
-                                 (Call
-                                    { cName = Just (Ident {cIdent = "fib"})
-                                   , cParams =
-                                        [ Just
-                                            (BinOps
-                                               (Just (Ident {cIdent = "n"}))
-                                               [ ( Just Sub
-                                                , Just (Number {cNumber = "1"}))
-                                               ])
-                                        ]
-                                    })
-                           })
-                   , SDecl
-                        (Const
-                           { dName = Just "before_that"
-                          , dType = Nothing
-                          , dExpr =
-                               Just
-                                 (Call
-                                    { cName = Just (Ident {cIdent = "fib"})
-                                   , cParams =
-                                        [ Just
-                                            (BinOps
-                                               (Just (Ident {cIdent = "n"}))
-                                               [ ( Just Sub
-                                                , Just (Number {cNumber = "2"}))
-                                               ])
-                                        ]
-                                    })
-                           })
-                   , Return Nothing
-                    ]
-              }
-          ]
-      }
-  ]
-
-f40' =
   Func
     { dName = Just "fib"
     , dArgs = [Argument {aName = Just "n", aExpr = Just "number"}]
@@ -124,12 +32,12 @@ f40' =
                   (BinOps
                      (Just (Ident {cIdent = "n"}))
                      [(Just LTE, Just (Number {cNumber = "1"}))])
-           , iThen =
+            , iThen =
                 [ Return
                     (Just
                        (Call
                           { cName = Just (Ident {cIdent = "fib"})
-                         , cParams =
+                          , cParams =
                               [ Just
                                   (BinOps
                                      (Just (Ident {cIdent = "n"}))
@@ -137,45 +45,45 @@ f40' =
                               ]
                           }))
                 ]
-           , iElse =
+            , iElse =
                 Just
                   [ SDecl
                       (Const
                          { dName = Just "prev"
-                        , dType = Nothing
-                        , dExpr =
+                         , dType = Nothing
+                         , dExpr =
                              Just
                                (Call
                                   { cName = Just (Ident {cIdent = "fib"})
-                                 , cParams =
+                                  , cParams =
                                       [ Just
                                           (BinOps
                                              (Just (Ident {cIdent = "n"}))
                                              [ ( Just Sub
-                                              , Just (Number {cNumber = "1"}))
+                                               , Just (Number {cNumber = "1"}))
                                              ])
                                       ]
                                   })
                          })
-                 , SDecl
+                  , SDecl
                       (Const
                          { dName = Just "before_that"
-                        , dType = Nothing
-                        , dExpr =
+                         , dType = Nothing
+                         , dExpr =
                              Just
                                (Call
                                   { cName = Just (Ident {cIdent = "fib"})
-                                 , cParams =
+                                  , cParams =
                                       [ Just
                                           (BinOps
                                              (Just (Ident {cIdent = "n"}))
                                              [ ( Just Sub
-                                              , Just (Number {cNumber = "2"}))
+                                               , Just (Number {cNumber = "2"}))
                                              ])
                                       ]
                                   })
                          })
-                 , Return
+                  , Return
                       (Just
                          (BinOps
                             (Just (Ident {cIdent = "prev"}))
