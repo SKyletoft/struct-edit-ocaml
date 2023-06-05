@@ -148,4 +148,18 @@ buildFib
     , f28, f29, f30, f31, f32, f33, f34, f35, f36 , f37, f38, f39, f40
     , f41, f42]
 
-main = putStrLn . unlines . Display.displays $ f42
+b1 = BinOps (Just (Number "1")) [(Just Add, Nothing)]
+b2 = BinOps (Just (Number "1")) [(Just Add, Just (UnOp (Just Neg) (Just (Number "2"))))]
+
+bopHighlights :: IO ()
+bopHighlights =
+  let bs =
+        [ highlight' [] b1
+        , highlight' [0] b1
+        , highlight' [1] b1
+        , highlight' [2] b1
+        , highlight' [2, 0] b2
+        ]
+   in putStrLn . unlines $ bs
+
+main = bopHighlights
