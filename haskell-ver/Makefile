@@ -1,4 +1,4 @@
-files := Main.hs Ast.hs Display.hs Edit.hs
+files := Main.hs Ast.hs Display.hs DisplayWithHighlight Edit.hs
 HS_FLAGS := \
 	-XGHC2021 \
 	-XOverloadedStrings \
