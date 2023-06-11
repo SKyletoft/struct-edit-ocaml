@@ -21,9 +21,13 @@ instance Display String where
   display = id
   displays x = [x]
 
+instance Display Char where
+  display c = [c]
+  displays c = [[c]]
+
 instance Display a => Display (Maybe a) where
   display = unwrap . fmap display
-  displays e = [display e]
+  displays e = [indent (display e)]
 
 unwrap (Just x) = x
 unwrap Nothing  = "_"
@@ -51,19 +55,34 @@ instance Display Argument where
      in n ++ ": " ++ t
   displays a = [display a]
 
+noSeparation :: Display a => [a] -> [String]
+noSeparation = map indent . concatMap displays
+
+commaSeparation :: (Display a, Display [a]) => [a] -> [String]
+commaSeparation xs = case xs of
+  []       -> []
+  [x]      -> map indent . displays $ x
+  (x:y:xs) -> (indent (display x) ++ ",") : displays (y : xs)
+
 instance Display [Argument] where
   display = unlines . displays
-  displays []       = []
-  displays [x]      = displays x
-  displays (x:y:xs) = (display x ++ ",") : displays (y : xs)
+  displays = commaSeparation
 
 instance Display [Decl] where
   display = unlines . displays
-  displays = concatMap displays
+  displays = noSeparation
 
 instance Display [Statement] where
   display = unlines . displays
-  displays = map display
+  displays = noSeparation
+
+instance Display [Maybe Expr] where
+  display = unlines . displays
+  displays = commaSeparation
+
+instance Display [Expr] where
+  display = unlines . displays
+  displays = commaSeparation
 
 instance Display Bop where
   display b =
@@ -94,18 +113,6 @@ instance Display Uop where
       Not  -> "!"
       BNot -> "~"
   displays u = [display u]
-
-instance Display [Maybe Expr] where
-  display = unlines . displays
-  displays []       = []
-  displays [x]      = displays x
-  displays (x:y:xs) = (display x ++ ",") : displays (y : xs)
-
-instance Display [Expr] where
-  display = unlines . displays
-  displays []       = []
-  displays [x]      = displays x
-  displays (x:y:xs) = (display x ++ ",") : displays (y : xs)
 
 instance Display Expr where
   display = unwords . displays
@@ -149,12 +156,12 @@ instance Display Statement where
              in todo
       If c t Nothing ->
         let cond = orBlank c
-            then' = map (indent . concat . displays) t
+            then' = displays t
          in ("if (" ++ cond ++ ") {") : then' ++ ["}"]
       If c t (Just e) ->
         let cond = orBlank c
-            then' = map (indent . concat . displays) t
-            else' = map (indent . concat . displays) e
+            then' = displays t
+            else' = displays e
          in ("if (" ++ cond ++ ") {") : then' ++ ["} else {"] ++ else' ++ ["}"]
       SDecl d -> map (++ ";") . displays $ d
 
@@ -174,8 +181,8 @@ instance Display Decl where
          in ["const " ++ name ++ ": " ++ ty ++ " = " ++ expr]
       Func n as r ss ->
         let name = unwrap n
-            args = indent' . displays $ as
+            args = displays as
             ret = unwrap r
-            expr = map indent . concatMap displays $ ss
+            expr = displays ss
          in ("function " ++ name ++ "(") :
             args ++ ("): " ++ ret ++ " {") : expr ++ ["}"]
