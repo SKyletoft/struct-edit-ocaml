@@ -137,6 +137,12 @@ f40 = editInner' f39 [0, 3, 0, 2, 0, 2, 0, 0, 1, 0] (InsertBinOp Add)
 f41 = editInner' f40 [0, 3, 0, 1, 0, 0, 0] Remove
 f42 = editInner' f41 [0, 3, 0, 1, 0, 0, 0] (InsertNumber "1")
 
+alignNumber :: Show a => a -> String
+alignNumber n =
+  let n' = show n
+      len = length n'
+   in replicate (5 - len) ' ' ++ n'
+
 buildFib :: IO ()
 buildFib
   = putStrLn
@@ -148,18 +154,25 @@ buildFib
     , f28, f29, f30, f31, f32, f33, f34, f35, f36 , f37, f38, f39, f40
     , f41, f42]
 
-b1 = BinOps (Just (Number "1")) [(Just Add, Nothing)]
-b2 = BinOps (Just (Number "1")) [(Just Add, Just (UnOp (Just Neg) (Just (Number "2"))))]
+testHighlight :: IO ()
+testHighlight =
+  putStrLn .
+  unlines .
+  zipWith (\n s -> alignNumber n ++ ":  " ++ s) [0 ..] . concatMap (++ [""]) $
+  [ Highlight.highlights' [] fib
+  , Highlight.highlights' [0] fib
+  , Highlight.highlights' [0, 0] fib
+  , Highlight.highlights' [2, 0] fib
+  , Highlight.highlights' [3, 0] fib
+  , Highlight.highlights' [3, 0, 0] fib
+  , Highlight.highlights' [3, 1, 0] fib
+  , Highlight.highlights' [3, 0, 0, 0, 0] fib
+  , Highlight.highlights' [3, 0, 0, 0, 0, 0, 0] fib
+  , Highlight.highlights' [3, 0, 0, 0, 0, 1, 0] fib
+  , Highlight.highlights' [3, 0, 0, 0, 0, 2, 0] fib
+  , Highlight.highlights' [3, 0, 0, 1, 0] fib
+  , Highlight.highlights' [3, 0, 0, 2, 0] fib
+  ]
 
-bopHighlights :: IO ()
-bopHighlights =
-  let bs =
-        [ highlight' [] b1
-        , highlight' [0] b1
-        , highlight' [1] b1
-        , highlight' [2] b1
-        , highlight' [2, 0] b2
-        ]
-   in putStrLn . unlines $ bs
-
-main = bopHighlights
+main :: IO ()
+main = testHighlight
