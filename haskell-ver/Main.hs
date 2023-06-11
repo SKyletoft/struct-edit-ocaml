@@ -90,6 +90,7 @@ fib =
                             [(Just Add, Just (Ident {cIdent = "before_that"}))]))
                   ]
             }
+        , Return Nothing
         ]
     }
 
