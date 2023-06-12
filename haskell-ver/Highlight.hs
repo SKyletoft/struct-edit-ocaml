@@ -47,6 +47,14 @@ highlight' []  = display
 highlight' [0] = invert . display
 highlight' is  = highlight is
 
+highlightOrDisplay i' i is e
+  | i == i' = highlight' is e
+  | otherwise = display e
+
+highlightsOrDisplays i' i is e
+  | i == i' = highlights' is e
+  | otherwise = displays e
+
 splitUp :: [a] -> Int -> ([a], a, [a])
 splitUp xs i =
   let pre = take i xs
@@ -109,23 +117,13 @@ instance Highlight Statement where
   highlight = todo
   highlights (i:is) s@(If {}) = case s of
       If c t Nothing ->
-        let cond
-              | i == 0 = highlight' is c
-              | otherwise = display c
-            then'
-              | i == 1 = highlights' is t
-              | otherwise = displays t
+        let cond  = highlightOrDisplay   0 i is c
+            then' = highlightsOrDisplays 1 i is t
          in ("if (" ++ cond ++ ") {") : then' ++ ["}"]
       If c t (Just e) ->
-        let cond
-              | i == 0 = highlight' is c
-              | otherwise = display c
-            then'
-              | i == 1 = highlights' is t
-              | otherwise = displays t
-            else'
-              | i == 2 = highlights' is e
-              | otherwise = displays e
+        let cond  = highlightOrDisplay   0 i is c
+            then' = highlightsOrDisplays 1 i is t
+            else' = highlightsOrDisplays 2 i is e
          in ("if (" ++ cond ++ ") {") : then' ++ ["} else {"] ++ else' ++ ["}"]
   highlights (0:is) s = case s of
     SExpr me  -> highlights' is me
@@ -137,39 +135,19 @@ instance Highlight Decl where
   highlights (i:is) d =
     case d of
       Let n t e ->
-        let name
-              | i == 0 = highlight' is n
-              | otherwise = display n
-            ty
-              | i == 1 = highlight' is t
-              | otherwise = display t
-            expr
-              | i == 2 = highlight' is e
-              | otherwise = display e
+        let name = highlightOrDisplay 0 i is n
+            ty   = highlightOrDisplay 1 i is t
+            expr = highlightOrDisplay 2 i is e
          in ["let " ++ name ++ ": " ++ ty ++ " = " ++ expr]
       Const n t e ->
-        let name
-              | i == 0 = highlight' is n
-              | otherwise = display n
-            ty
-              | i == 1 = highlight' is t
-              | otherwise = display t
-            expr
-              | i == 2 = highlight' is e
-              | otherwise = display e
+        let name = highlightOrDisplay 0 i is n
+            ty   = highlightOrDisplay 1 i is t
+            expr = highlightOrDisplay 2 i is e
          in ["const " ++ name ++ ": " ++ ty ++ " = " ++ expr]
       Func n as r ss ->
-        let name
-              | i == 0 = highlight' is n
-              | otherwise = display n
-            args
-              | i == 1 = highlights' is as
-              | otherwise = displays as
-            ret
-              | i == 2 = highlight' is r
-              | otherwise = display r
-            expr
-              | i == 3 = highlights' is ss
-              | otherwise = displays ss
+        let name = highlightOrDisplay   0 i is n
+            args = highlightsOrDisplays 1 i is as
+            ret  = highlightOrDisplay   2 i is r
+            expr = highlightsOrDisplays 3 i is ss
          in ("function " ++ name ++ "(") :
             args ++ ("): " ++ ret ++ " {") : expr ++ ["}"]
