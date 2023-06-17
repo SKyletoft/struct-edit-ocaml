@@ -33,9 +33,6 @@
 					default = packages.struct-edit;
 				};
 				custom-haskell = pkgs.haskell.packages.ghc92.ghc.withPackages(pkgs: with pkgs; [
-					split
-					brick
-
 					hindent
 					stylish-haskell
 					QuickCheck

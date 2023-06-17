@@ -27,18 +27,24 @@ instance Display Char where
 
 instance Display a => Display (Maybe a) where
   display = unwrap . fmap display
-  displays e = [indent (display e)]
+  displays = unwraps . fmap displays
 
-unwrap (Just x) = x
-unwrap Nothing  = "_"
+unwrap m = case m of
+  (Just x) -> x
+  Nothing  -> "_"
+
+unwraps m = case m of
+  (Just x) -> x
+  Nothing  -> ["_"]
 
 orBlank :: Display a => Maybe a -> String
 orBlank = unwrap . fmap display
 
 join :: String -> [String] -> String
-join c []     = ""
-join c [x]    = x
-join c (x:xs) = x ++ c ++ join c xs
+join c ss = case ss of
+  []     -> ""
+  [x]    -> x
+  (x:xs) -> x ++ c ++ join c xs
 
 indent :: String -> String
 -- indent s = '\t' : s
@@ -48,25 +54,24 @@ indent s = "    " ++ s
 indent' :: [String] -> [String]
 indent' = map indent
 
-instance Display Argument where
-  display (Argument name ty) =
-    let n = unwrap name
-        t = unwrap ty
-     in n ++ ": " ++ t
-  displays a = [display a]
-
 noSeparation :: Display a => [a] -> [String]
 noSeparation = map indent . concatMap displays
+
+commaSeparationIndent :: (Display a, Display [a]) => [a] -> [String]
+commaSeparationIndent xs = case xs of
+  []       -> []
+  [x]      -> [indent . display $ x]
+  (x:y:xs) -> (indent (display x) ++ ",") : displays (y : xs)
 
 commaSeparation :: (Display a, Display [a]) => [a] -> [String]
 commaSeparation xs = case xs of
   []       -> []
-  [x]      -> map indent . displays $ x
-  (x:y:xs) -> (indent (display x) ++ ",") : displays (y : xs)
+  [x]      -> displays x
+  (x:y:xs) -> (display x ++ ",") : displays (y : xs)
 
 instance Display [Argument] where
   display = unlines . displays
-  displays = commaSeparation
+  displays = commaSeparationIndent
 
 instance Display [Decl] where
   display = unlines . displays
@@ -83,6 +88,13 @@ instance Display [Maybe Expr] where
 instance Display [Expr] where
   display = unlines . displays
   displays = commaSeparation
+
+instance Display Argument where
+  display (Argument name ty) =
+    let n = unwrap name
+        t = unwrap ty
+     in n ++ ": " ++ t
+  displays a = [display a]
 
 instance Display Bop where
   display b =
