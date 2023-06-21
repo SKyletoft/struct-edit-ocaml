@@ -8,7 +8,7 @@ import qualified Display
 import qualified Edit
 import           Edit (Action (..))
 import qualified Highlight
--- import qualified FFI.Termios as Termios
+import qualified FFI.Termios as Termios
 import qualified Ui
 
 {-
@@ -217,5 +217,5 @@ testHighlight2
 
 main :: IO ()
 main = do
-  -- Termios.setupTerminal
-  Ui.navigate (Ui.Ast fib) [0]
+  Termios.setupTerminal
+  Ui.navigate' [Ui.Ast fib] [0]

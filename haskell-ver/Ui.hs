@@ -1,16 +1,18 @@
 module Ui where
 
-import           Prelude   hiding (Left, Right)
+import           Debug.Trace
+import           GHC.Stack
+import           Prelude     hiding (Left, Right)
 
 import           Ast
-import qualified Edit
-import           Edit      (Edit, Action(..))
+import           Display     (Display)
 import qualified Display
-import           Display   (Display)
+import           Edit        (Action (..), Edit)
+import qualified Edit
+import           Highlight   (Cursor, Highlight)
 import qualified Highlight
-import           Highlight (Cursor, Highlight)
+import           Navigate    (Direction (..), Navigate)
 import qualified Navigate
-import           Navigate  (Navigate, Direction(..))
 
 data DynAst =
   forall a. (Highlight a, Edit a, Display a, Navigate a) =>
@@ -41,23 +43,26 @@ instance Highlight DynAst where
   highlights is (Ast a) = Highlight.highlights is a
 
 instance Navigate DynAst where
-  navigate (Ast a) = Navigate.navigate a
+  maxCursor (Ast a) = Navigate.maxCursor a
+  validate (Ast a) = Navigate.validate a
 
-render :: [DynAst] -> Cursor -> IO ()
+render :: HasCallStack => [DynAst] -> Cursor -> IO ()
 render as cur = do
   let lines = Highlight.highlights' cur as
   let actions' = Edit.actions . Edit.getChild as $ cur
   mapM_ putStrLn lines
 
-navigate :: DynAst -> Highlight.Cursor -> IO ()
-navigate ast cur = do
+navigate' :: [DynAst] -> Highlight.Cursor -> IO ()
+navigate' ast cur = do
   c <- getChar
   let cur' =
         case c of
-          'a' -> Navigate.navigate ast cur Left
-          'd' -> Navigate.navigate ast cur Right
-          'w' -> Navigate.navigate ast cur In
-          's' -> Navigate.navigate ast cur Out
+          'a' -> Navigate.navigate ast Left cur
+          'd' -> Navigate.navigate ast Right cur
+          'w' -> Navigate.navigate ast Out cur
+          's' -> Navigate.navigate ast In cur
           _   -> cur
-  render [ast] cur'
-  navigate ast cur'
+  let cur'' = reverse . (0:) . reverse $ cur'
+  print (Navigate.validate ast cur'', cur')
+  render ast cur''
+  navigate' ast cur'

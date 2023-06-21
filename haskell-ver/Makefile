@@ -1,4 +1,4 @@
-files := Main.hs Ast.hs Display.hs Highlight.hs Edit.hs Ui.hs
+files := Main.hs Ast.hs Display.hs Highlight.hs Edit.hs Ui.hs Navigate.hs
 HS_FLAGS := \
 	-XGHC2021 \
 	-XOverloadedStrings \
