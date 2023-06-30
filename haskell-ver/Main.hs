@@ -8,7 +8,7 @@ import qualified Display
 import qualified Edit
 import           Edit (Action (..))
 import qualified Highlight
-import qualified FFI.Termios as Termios
+-- import qualified FFI.Termios as Termios
 import qualified Ui
 import qualified PrettyDisplay
 
@@ -218,5 +218,5 @@ testHighlight2
 
 main :: IO ()
 main = do
-  Termios.setupTerminal
+  -- Termios.setupTerminal
   Ui.navigate' [Ui.Ast fib] [0]
