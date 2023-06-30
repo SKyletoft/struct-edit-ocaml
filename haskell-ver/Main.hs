@@ -10,6 +10,7 @@ import           Edit (Action (..))
 import qualified Highlight
 import qualified FFI.Termios as Termios
 import qualified Ui
+import qualified PrettyDisplay
 
 {-
   function fib(n: number): number {
