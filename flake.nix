@@ -49,9 +49,20 @@
 					ocamlPackages.utop
 					ocamlPackages.merlin
 				];
+				rust-dev = with pkgs; [
+					cargo
+					rustc
+					rustfmt
+					clippy
+					rust-analyzer
+					cargo-expand
+					hyperfine
+					nodejs
+				];
 				devShells.default = pkgs.mkShell {
 					nativeBuildInputs = custom-ocaml ++ (with pkgs; [
 						custom-haskell
+						rust-dev
 						gnumake
 					]);
 					shellHook = ''

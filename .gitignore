@@ -36,5 +36,8 @@ _opam/
 *.hi
 Main
 
+# Rust
+**target
+
 # Nix
 result
