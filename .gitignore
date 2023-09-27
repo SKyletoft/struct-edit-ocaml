@@ -38,6 +38,7 @@ Main
 
 # Rust
 **target
+tree-sitter-typescript
 
 # Nix
 result
